@@ -44,88 +44,68 @@ def refineHtml(data):
 # print(contents)
 
 
-# Set pre and post indexes to get the total count of cases
-totalCountPreIndex = 'div class="maincounter-number"> <span style="color:#aaa">'
+code = refineHtml(contents)
+codeLines = code.split("\n")
+
+# Line 8 index 7 is total cases
+totalCount = codeLines[7]
+# Line 11 index 10 is death count
+deathCount = codeLines[10]
+# Line 13 index 12 is recovered count
+recoveredCount = codeLines[12]
+# Line 15 index 14 is active case total
+activeInfectedTotal = codeLines[14]
+# Line 17 index 16 is mild infections - the percentage
+mildConditionCount = codeLines[16]
+# line 19 index 18 is critical -the percentage
+criticalConditionCount = codeLines[18]
+
+print(totalCount)
+print(deathCount)
+print(recoveredCount)
+print(activeInfectedTotal)
+print(mildConditionCount)
+print(criticalConditionCount)
+
 totalCountPostIndex = ' </span>'
-
-# Use our function to display
-print("Getting Total Count")
-totalCount = getData(totalCountPreIndex, totalCountPostIndex, str(contents))
-totalCount = totalCount.replace(",","")
-
-# Set pre and post indexes to get the death count
-deathCountPreIndex = 'div class="maincounter-number"> <span>'
-deathCountPostIndex = '</span>'
-
-# Use our function to display
-print("Getting Death Count")
-deathCount = getData(deathCountPreIndex, deathCountPostIndex, str(contents))
-deathCount = deathCount.replace(",","")
-
-# Set pre and post indexes to get the recovered count
-recoveredCountPreIndex = '<div class="maincounter-number" style="color:#8ACA2B "> <span>'
-recoveredCountPostIndex = '</span>'
-
-# Use our function to display
-print("Getting Recovered Count")
-recoveredCount = getData(recoveredCountPreIndex, recoveredCountPostIndex, str(contents))
-recoveredCount = recoveredCount.replace(",","")
-
-# Set pre and post indexes to get the recovered count
-activeInfectedPreIndex = '<div class="number-table-main">'
-activeInfectedPostIndex = '</div>'
-
-# Use our function to display
-print("Getting Active Infection Cases")
-activeInfectedTotal = getData(activeInfectedPreIndex, activeInfectedPostIndex, str(contents))
-activeInfectedTotal = activeInfectedTotal.replace(",","")
-
-# Set pre and post index to get the mild condition count
-mildConditionPreIndex = '<span class="number-table" style="color:#8080FF">'
-mildConditionPostIndex = '</span>'
-
-# Use our function to display
-print("Getting Amount of Mild Cases")
-mildConditionCount = getData(mildConditionPreIndex, mildConditionPostIndex, str(contents))
-mildConditionCount = mildConditionCount.replace(",","")
-
-# Set pre and post index to get the mild condition count
-criticalConditionPreIndex = '<span class="number-table" style="color:red ">'
-criticalConditionPostIndex = '</span>'
-
-# Use our function to display
-print("Getting Amount of Critical Cases")
-criticalConditionCount = getData(criticalConditionPreIndex, criticalConditionPostIndex, str(contents))
-criticalConditionCount = criticalConditionCount.replace(",","")
 
 # Get the data from the countries table
 tableDataPreIndex = '<tbody>'
 tableDataPostIndex = '</tbody>'
 
 # Use our functions get refine our data
-print("Getting table data")
 tableData = getData(tableDataPreIndex, totalCountPostIndex, str(contents))
 
 # Replace any missing values with ???
-tableData = tableData.replace('<td style="font-weight: bold; text-align:right;"> </td>', "???\n")
-tableData = tableData.replace('<td style="font-weight: bold; text-align:right"> </td>', "???\n")
-tableData = tableData.replace('<td style="font-weight: bold; text-align:right"></td>', "???\n")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right;"> </td>', "???")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right"> </td>', "???")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right"></td>', "???")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right;"></td>', "???")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right;">                                </td>', "???")
+tableData = tableData.replace('<td style="font-weight: bold; text-align:right;">  </td>', "???")
+print(tableData)
+tableData = tableData.replace("\\n\\n", "")
+tableData = tableData.replace("\\n", "~")
 
 # Use function to clean html
-print("Cleaning HTML")
 refinedTable = refineHtml(tableData)
+decodedString = unidecode.unidecode(refinedTable)
 
 # List layout for each countries
 # Country Name, Total Cases, New Cases, Total Deaths, New Deaths, Total Recovered, Active Cases, Serious Cases, tot
 res = []
-decodedString = unidecode.unidecode(refinedTable)
-tableResults = decodedString.split('\n')
+temp1 = []
+tableResults = decodedString.split('~')
+for x in tableResults:
+    x = x.replace('\\n', '')
+    if x != '' and x != " ":
+        temp1.append(x)
 index = 0
-while index < len(tableResults):
+while index < len(temp1):
     y = 0
     temp = []
-    while y <= 8 and index < len(tableResults):
-        temp.append(tableResults[index])
+    while y <= 10 and index < len(temp1):
+        temp.append(temp1[index])
         index = index + 1
         y = y + 1
     res.append(temp)
